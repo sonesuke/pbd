@@ -1,0 +1,62 @@
+<html>
+<head>
+</head>
+<body>
+	<script src="./three.min.js"></script>
+	<script src="./TrackballControls.js"></script>
+	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	<script>
+
+var traj;
+d3.text("traj.csv", function(error, text) {
+	var data = d3.csv.parseRows(text);
+	traj = data;
+});
+
+var scene = new THREE.Scene();
+var camera = new THREE.PerspectiveCamera(75, 600 / 400, 1, 1000);
+var controls = new THREE.TrackballControls(camera);
+camera.position.set(0, 0, 30);
+
+if (window.WebGLRenderingContext) {
+	renderer = new THREE.WebGLRenderer();
+} else {
+	renderer = new THREE.CanvasRenderer();
+}
+renderer.setSize(600, 400); 
+document.body.appendChild(renderer.domElement);
+
+var directionalLight = new THREE.DirectionalLight('#ffffff', 1);
+directionalLight.position.set(0, 7, 10);
+scene.add(directionalLight); // シーンに追加
+
+var ps = new Array();
+var i;
+for (i = 0; i < 9; i++) {
+	var g = new THREE.BoxGeometry(1, 1, 1);
+	var m = new THREE.MeshPhongMaterial({color: '#dd3b6f'});
+	p = new THREE.Mesh(g, m);
+	ps.push(p)
+	ps[i].position.set(i*2, 0, 0);
+	scene.add(ps[i]);
+}
+
+
+var r_index = 0;
+function render() {
+	requestAnimationFrame(render);
+
+	var i;
+	for (i = 0; i < 9; i++) {
+		fidx = r_index % traj.length;
+		ps[i].position.set(traj[fidx][i*3 + 0], traj[fidx][i*3 + 1], traj[fidx][i*3 + 2]);
+	}
+	r_index += 1;
+	controls.update();
+
+	renderer.render(scene, camera);
+}
+render();
+	</script>
+</body>
+</html>
